@@ -28,7 +28,8 @@ childconcurrency = int(Set.childconcurrency)
 
 Dicts = os.path.join('Auxiliary','Black_Url.list')
 
-black_list = list(set([x.strip() for x in open(Dicts, 'r', encoding='utf-8').readlines()]))
+with open(Dicts, 'r', encoding='utf-8') as blacklist_file:
+    black_list = list({x.strip() for x in blacklist_file})
 
 BA = Domains.objects.all()
 # 这里获取所有监控子域名，哪怕没有设置监控，因为只是爬行网址，并不会消耗过多资源
@@ -67,7 +68,7 @@ def matchsubdomain(subdomains, html):
             result = re.findall(regexp, html, re.I)
             deal = map(lambda s: re.sub('"', '', s[1:].lower()), result)
             for dea in deal:
-                if 'http' not in deal:
+                if 'http' not in dea:
                     results.add('http://'+dea)
                 else:
                     results.add(dea)
@@ -227,13 +228,15 @@ def Get_Subdomain(url):
     subdoi = []
     url_sche = urlparse(url).scheme+'://'
     b = find_by_url(url)
+    if not b:
+        return subdoi
     for real_url in b:
         subdoi.append(urlparse(real_url).scheme + '://' + urlparse(real_url).netloc)
     e = find_subdomain(b,url)
     if e:
         for i in e:
             subdoi.append(url_sche + i)
-    return subdoi
+    return list(dict.fromkeys(subdoi))
 
 
 from bs4 import BeautifulSoup as bs
