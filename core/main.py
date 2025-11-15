@@ -6,6 +6,7 @@ from core.Subdomain_Baidu import Baidu
 from core.Subdomain_Brute import Brute
 from core.Subdomain_Crawl import Crawl
 from core.Subdomain_Api import Api,Requests
+from core.Subdomain_OneForAll import collect_from_oneforall, is_oneforall_available
 from core.Url_Info import Get_Url_Info,RequestsTitle,DomainsInfos,Return_Content_Difflib
 from core.Host_Info import Get_Ip_Info,Get_Alive_Url
 from core.Cor import Cor
@@ -800,6 +801,27 @@ def Sub_Brute(Sub_Domains):
             # 每爆破一个子域名，歇会儿
             time.sleep(5)
         time.sleep(3600*48)
+
+
+
+def Sub_OneForAll(Sub_Domains):
+    if not is_oneforall_available():
+        print('[OneForAll] 未检测到可用的工具，跳过该任务。')
+        return
+    while 1:
+        for domain in Sub_Domains:
+            try:
+                results = collect_from_oneforall(domain)
+            except Exception as e:
+                Except_Log(stat=88, url=domain + '|OneForAll|', error=str(e))
+                continue
+            if results:
+                valid = list({url for url in results if domain in url})
+                if valid:
+                    with ThreadPoolExecutor(max_workers=pool_count) as pool:
+                        pool.map(Add_Data_To_Url, valid)
+            time.sleep(5)
+        time.sleep(3600 * 24)
 
 
 

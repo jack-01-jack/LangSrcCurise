@@ -102,7 +102,8 @@ from .Url_Info import DomainsInfos
 print('[加载] 开始获取泛解析对比数据 请耐心等待 获取目标总数为 : {}\n'.format(len(Sub_Domains)))
 DomainsInfos(Sub_Domains)
 print('[成功] 泛解析对比数据获取成功 请耐心等待数据持续收集整理\n\n')
-from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_ChangeInf,Sub_Api,Heartbeat
+from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_ChangeInf,Sub_Api,Heartbeat,Sub_OneForAll
+from .Subdomain_OneForAll import is_oneforall_available
 from .Send_Report import SendEmailReport,TestEmail
 try:
     TestEmail(host=email_host,port=email_port,sender=email_username,pwd=email_password,receiver=email_receivers[0])
@@ -124,6 +125,11 @@ def start():
     p3.start()
     p4.start()
     p5.start()
+    if is_oneforall_available():
+        p11 = Process(target=Sub_OneForAll, args=(Sub_Domains,))
+        p11.start()
+    else:
+        print('[OneForAll] 未启用或未配置，跳过独立进程启动。')
     p9.start()
     # 下面这行代码注释，则不会每天发送邮箱
     p10.start()
